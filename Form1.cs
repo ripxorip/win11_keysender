@@ -20,7 +20,20 @@ namespace win11_keysender
             IPEndPoint ip = new IPEndPoint(IPAddress.Any, 0);
             byte[] bytes = udpClient.EndReceive(ar, ref ip);
             string inputText = Encoding.ASCII.GetString(bytes);
-            Debug.Print(inputText);
+            // If the string is equalt to start, then start the key sending
+            if (inputText == "start")
+            {
+                Debug.Print("Got the start");
+            }
+            else if (inputText == "stop")
+            {
+                Debug.Print("Got the stop");
+                // Clear the text box on the UI thread
+                this.Invoke((MethodInvoker)delegate
+                {
+                    textBox1.Text = "";
+                });
+            }
             udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), null);
         }
 
