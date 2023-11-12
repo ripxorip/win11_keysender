@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using WindowsInput;
+using WindowsInput.Native;
 
 namespace win11_keysender
 {
@@ -23,16 +25,19 @@ namespace win11_keysender
             // If the string is equalt to start, then start the key sending
             if (inputText == "start")
             {
-                Debug.Print("Got the start");
+                var simulator = new InputSimulator();
+                simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.LWIN, VirtualKeyCode.VK_H);
             }
             else if (inputText == "stop")
             {
-                Debug.Print("Got the stop");
                 // Clear the text box on the UI thread
                 this.Invoke((MethodInvoker)delegate
                 {
                     textBox1.Text = "";
                 });
+                // Send the escape key
+                var simulator = new InputSimulator();
+                simulator.Keyboard.KeyPress(VirtualKeyCode.ESCAPE);
             }
             udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), null);
         }
