@@ -25,19 +25,27 @@ namespace win11_keysender
             // If the string is equalt to start, then start the key sending
             if (inputText == "start")
             {
-                var simulator = new InputSimulator();
-                simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.LWIN, VirtualKeyCode.VK_H);
-            }
-            else if (inputText == "stop")
-            {
                 // Clear the text box on the UI thread
                 this.Invoke((MethodInvoker)delegate
                 {
                     textBox1.Text = "";
                 });
+                var simulator = new InputSimulator();
+                simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.LWIN, VirtualKeyCode.VK_H);
+            }
+            else if (inputText == "stop")
+            {
                 // Send the escape key
                 var simulator = new InputSimulator();
                 simulator.Keyboard.KeyPress(VirtualKeyCode.ESCAPE);
+
+                // Send the selected text over UDP (Just to have something to test with)
+                var selectedText = textBox1.Text;
+                UdpClient udpClient = new UdpClient();
+                byte[] bytesToSend = Encoding.ASCII.GetBytes(selectedText);
+                // FIXME The IP shall be set using a UDP command instead, other than that it seems to work!
+                udpClient.Send(bytesToSend, bytesToSend.Length, "100.80.108.122", 1339);
+
             }
             udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), null);
         }
