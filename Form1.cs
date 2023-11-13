@@ -10,6 +10,9 @@ namespace win11_keysender
     public partial class Form1 : Form
     {
         private UdpClient udpClient;
+        private string clipboard_ip = "";
+        private string voiceboxclient_ip = "";
+
         public Form1()
         {
             InitializeComponent();
@@ -33,19 +36,53 @@ namespace win11_keysender
                 var simulator = new InputSimulator();
                 simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.LWIN, VirtualKeyCode.VK_H);
             }
+            else if (inputText.StartsWith("set_clipboard_ip:"))
+            {
+                string[] parts = inputText.Split(':');
+                if (parts.Length == 2)
+                {
+                    clipboard_ip = parts[1];
+                    Debug.Print(clipboard_ip);
+                }
+            }
+            else if (inputText.StartsWith("set_client_ip:"))
+            {
+                string[] parts = inputText.Split(':');
+                if (parts.Length == 2)
+                {
+                    voiceboxclient_ip = parts[1];
+                    Debug.Print(voiceboxclient_ip);
+                }
+            }
             else if (inputText == "stop")
             {
                 // Send the escape key
                 var simulator = new InputSimulator();
                 simulator.Keyboard.KeyPress(VirtualKeyCode.ESCAPE);
 
-                // Send the selected text over UDP (Just to have something to test with)
-                var selectedText = textBox1.Text;
-                UdpClient udpClient = new UdpClient();
-                byte[] bytesToSend = Encoding.ASCII.GetBytes(selectedText);
-                // FIXME The IP shall be set using a UDP command instead, other than that it seems to work!
-                udpClient.Send(bytesToSend, bytesToSend.Length, "100.80.108.122", 1339);
+                // This is just an initial hack so I can use dictation at all
+                if (clipboard_ip != "none")
+                {
+                    var selectedText = textBox1.Text;
+                    UdpClient udpClient = new UdpClient();
+                    byte[] bytesToSend = Encoding.UTF8.GetBytes(selectedText);
+                    udpClient.Send(bytesToSend, bytesToSend.Length, clipboard_ip, 1339);
 
+                    // Add a small delay to allow the clipboard to be updated
+                    Thread.Sleep(300);
+
+                    bytesToSend = Encoding.UTF8.GetBytes("25,0");
+                    udpClient.Send(bytesToSend, bytesToSend.Length, voiceboxclient_ip, 5000);
+
+                    bytesToSend = Encoding.UTF8.GetBytes("37,0");
+                    udpClient.Send(bytesToSend, bytesToSend.Length, voiceboxclient_ip, 5000);
+
+                    bytesToSend = Encoding.UTF8.GetBytes("37,1");
+                    udpClient.Send(bytesToSend, bytesToSend.Length, voiceboxclient_ip, 5000);
+
+                    bytesToSend = Encoding.UTF8.GetBytes("25,1");
+                    udpClient.Send(bytesToSend, bytesToSend.Length, voiceboxclient_ip, 5000);
+                }
             }
             udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), null);
         }
