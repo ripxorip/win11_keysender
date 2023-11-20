@@ -154,7 +154,7 @@ namespace win11_keysender
             InitializeComponent();
             udpClient = new UdpClient(5000);
             udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), null);
-            unittest_test_handle_text_change();
+            //unittest_test_handle_text_change();
         }
 
         private void ReceiveCallback(IAsyncResult ar)
@@ -193,8 +193,7 @@ namespace win11_keysender
         }
 
         private void send_key(int key, bool press) {
-            // Create a string with %x,%d where %x is the key in hex and press is 1 or 0
-            string message = string.Format("{0},{1}", key.ToString("X"), press ? "1" : "0");
+            string message = string.Format("{0},{1}", key.ToString("X"), press ? "0" : "1");
             Debug.Print("Sending message: " + message);
             // Get the char that corresponds to the key from charToKeyCombo
             string keyChar = charToKeyCombo.FirstOrDefault(x => x.Value == key).Key;
@@ -240,24 +239,28 @@ namespace win11_keysender
             {
                 send_key(charToKeyCombo["rightalt"], true);
                 send_key(charToKeyCombo["o"], true);
+                send_key(charToKeyCombo["o"], false);
                 send_key(charToKeyCombo["rightalt"], false);
             }
             else if (c == 'å')
             {
                 send_key(charToKeyCombo["rightalt"], true);
                 send_key(charToKeyCombo["a"], true);
+                send_key(charToKeyCombo["a"], false);
                 send_key(charToKeyCombo["rightalt"], false);
             }
             else if (c == 'ä')
             {
                 send_key(charToKeyCombo["rightalt"], true);
                 send_key(charToKeyCombo["r"], true);
+                send_key(charToKeyCombo["r"], false);
                 send_key(charToKeyCombo["rightalt"], false);
             }
             else if (c == '?')
             {
                 send_key(charToKeyCombo["leftshift"], true);
                 send_key(charToKeyCombo["/"], true);
+                send_key(charToKeyCombo["/"], false);
                 send_key(charToKeyCombo["leftshift"], false);
             }
             else {
@@ -313,6 +316,7 @@ namespace win11_keysender
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             string inputText = textBox1.Text;
+            handle_text_change(inputText);
         }
     }
 }
