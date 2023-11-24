@@ -13,6 +13,8 @@ namespace win11_keysender
         private string voiceboxclient_ip = "";
         private string sentText = "";
 
+        private bool running = false;
+
         private Dictionary<string, int> charToKeyCombo = new Dictionary<string, int>()
         {
             /* Handle åäö separately */
@@ -147,6 +149,7 @@ namespace win11_keysender
             { "ä", 0x00},
             { "ö", 0x00},
             { "?", 0x00},
+            { "!", 0x00},
         };
 
         public Form1()
@@ -157,6 +160,21 @@ namespace win11_keysender
             //unittest_test_handle_text_change();
         }
 
+        private void stop() {
+            // Send the escape key (stop the dictation)
+            var simulator = new InputSimulator();
+            simulator.Keyboard.KeyPress(VirtualKeyCode.ESCAPE);
+            voiceboxclient_ip = "";
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                textBox1.Text = "";
+                sentText = "";
+            });
+
+            running = false;
+        }
+
         private void ReceiveCallback(IAsyncResult ar)
         {
             IPEndPoint ip = new IPEndPoint(IPAddress.Any, 0);
@@ -165,17 +183,15 @@ namespace win11_keysender
 
             if (inputText.StartsWith("start@"))
             {
+                if (running) { 
+                    stop();
+                    Thread.Sleep(500);
+                }
+                running = true;
                 string[] parts = inputText.Split('@');
                 if (parts.Length == 2)
                 {
                     voiceboxclient_ip = parts[1];
-
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        textBox1.Text = "";
-                        sentText = "";
-                    });
- 
                     var simulator = new InputSimulator();
                     simulator.Keyboard.ModifiedKeyStroke(VirtualKeyCode.LWIN, VirtualKeyCode.VK_H);
                 }
@@ -183,10 +199,7 @@ namespace win11_keysender
 
             else if (inputText == "stop")
             {
-                // Send the escape key (stop the dictation)
-                var simulator = new InputSimulator();
-                simulator.Keyboard.KeyPress(VirtualKeyCode.ESCAPE);
-                voiceboxclient_ip = "";
+                stop();
             }
 
             udpClient.BeginReceive(new AsyncCallback(ReceiveCallback), null);
@@ -261,6 +274,13 @@ namespace win11_keysender
                 send_key(charToKeyCombo["leftshift"], true);
                 send_key(charToKeyCombo["/"], true);
                 send_key(charToKeyCombo["/"], false);
+                send_key(charToKeyCombo["leftshift"], false);
+            }
+            else if (c == '!')
+            {
+                send_key(charToKeyCombo["leftshift"], true);
+                send_key(charToKeyCombo["1"], true);
+                send_key(charToKeyCombo["1"], false);
                 send_key(charToKeyCombo["leftshift"], false);
             }
             else {
