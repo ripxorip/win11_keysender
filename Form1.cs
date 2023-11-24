@@ -144,6 +144,7 @@ namespace win11_keysender
             { "leftmeta", 0x85},
             { "rightmeta", 0x86},
             { "compose", 0x87},
+            { "\n", 0x24},
             // Special keys
             { "å", 0x00},
             { "ä", 0x00},
@@ -207,10 +208,10 @@ namespace win11_keysender
 
         private void send_key(int key, bool press) {
             string message = string.Format("{0},{1}", key.ToString("X"), press ? "0" : "1");
-            Debug.Print("Sending message: " + message);
+            //Debug.Print("Sending message: " + message);
             // Get the char that corresponds to the key from charToKeyCombo
             string keyChar = charToKeyCombo.FirstOrDefault(x => x.Value == key).Key;
-            Debug.Print("(Which corresponds to: " + keyChar + ")");
+            //Debug.Print("(Which corresponds to: " + keyChar + ")");
             if (voiceboxclient_ip != "")
             {
                 // Send this message to the ip specified in voiceboxclient_ip at port 5000 overt UDP
@@ -233,11 +234,11 @@ namespace win11_keysender
                     return;
                 }
             }
-
             char c = key[0];
             if (!charToKeyCombo.ContainsKey(char.ToLower(c).ToString()))
             {
                 Debug.Print("Key not found in dict: " + c);
+                Debug.Print("(Key as hex: " + ((int)c).ToString("X") + ")");
                 return;
             }
 
